@@ -12,25 +12,25 @@
 const float radius = 1.0f; //Circle radius 0.0 by default, hides the circles.
 const auto circleColor = sf::Color::Cyan;
 
-const float vMax = 1.0f;
-const float vMin = 0.2f;
-const float cohesionDistance = 500.0f;
-const float separationDistance = 50.0f;
-const float maxForce = .5f;
-const float borderDistance = 100.0f; // Distance from window border to start avoiding
+const float vMax = 3.0f;
+const float vMin = 2.0f;
+const float cohesionDistance = 60.0f;
+const float separationDistance = 55.0f;
+const float maxForce = 1.0f;
+const float borderDistance = 20.0f; // Distance from window border to start avoiding
 
-const int spawnCount = 3; // Amount of entities spawned per click (does not function likely due to similar starting values (randomness not being random))
+const int spawnCount = 10; // Amount of entities spawned per click (does not function likely due to similar starting values (randomness not being random))
 const double pi = 3.14159265539f;
-const float repulsionDistance = 70.0f; // Distance for repulsion behavior
-const float repulsionForceFactor = 3.0f; // Strength of repulsion force
+const float repulsionDistance = 30.0f; // Distance for repulsion behavior
+const float repulsionForceFactor = 50.0f; // Strength of repulsion force
 
 
 const int windowSizeX = 1200;
 const int windowSizeY = 600;
-const int gridSizeX = 20;
+const int gridSizeX = 50;
 const int gridSizeY = gridSizeX * windowSizeY/windowSizeX;
-const int pixelSize = 1; //arbitrary number, at 1 it's a grid higher it becomes smaller
-//const int maxCircleCount = 3; //Pixel brightness is at maximum
+const int pixelSize = 3; //arbitrary number, at 1 it's a grid higher it becomes smaller
+float maxCircleCount = 0.f; //Pixel brightness is at maximum
 //std::vector<std::vector<int> > grid(gridSizeX, std::vector<int>(gridSizeY, 0));
 
 struct MovingCircle {
@@ -169,8 +169,15 @@ sf::Vector2f separation(const MovingCircle& currentCircle, const std::vector<Mov
 // Counts the amount of boids active
 void updateActiveBoidsText(sf::Text& text, const std::vector<MovingCircle>& circles) {
     int activeBoids = circles.size();
-    text.setString("Active Boids: " + std::to_string(activeBoids));
+    text.setString("Active Boids: " + std::to_string(maxCircleCount));
 }
+
+float calcProximity(float gridX, float gridY, float a, float b){
+    gridX += windowSizeX / gridSizeX / 2;
+    gridY += windowSizeY / gridSizeY / 2;
+    return sqrt(pow(gridX - a, 2) + pow(gridY - b, 2)) / (sqrt(pow(windowSizeX/gridSizeX, 2) + pow(windowSizeY/gridSizeY, 2)) /2);
+}
+
 
 
 int main()
@@ -242,6 +249,7 @@ int main()
             }
         }
 
+        maxCircleCount = 0.f;
 
         float proximity = 0.f;
 
@@ -250,10 +258,11 @@ int main()
             int gridX = static_cast<int>(movingCircle.position.x / (window.getSize().x / gridSizeX));
             int gridY = static_cast<int>(movingCircle.position.y / (window.getSize().y / gridSizeY));
 
-            proximity = (((window.getSize().x / gridSizeX * gridX) + (windowSizeX / gridSizeX / 2) - movingCircle.position.x) / (window.getSize().x / gridSizeX) + ((window.getSize().y / gridSizeY * gridY) + (windowSizeX / gridSizeX / 2)- movingCircle.position.y) / (window.getSize().y / gridSizeY)) *-1 / 2;
+            proximity = calcProximity(gridX * windowSizeX / gridSizeX, gridY * windowSizeY / gridSizeY, movingCircle.position.x, movingCircle.position.y);
             
             if (gridX >= 0 && gridX < gridSizeX && gridY >= 0 && gridY < gridSizeY) {
-                grid[gridX][gridY] += proximity;
+                grid[gridX][gridY] += 1 - proximity;
+                maxCircleCount = std::max(maxCircleCount, grid[gridX][gridY]);
             }
         }
 
@@ -267,15 +276,15 @@ int main()
 
         for (int x = 0; x < gridSizeX; ++x) {
             for (int y = 0; y < gridSizeY; ++y) {
-                float transparency = grid[x][y];// Transparency based on the maxCircleCount (Amount of 'boids' is a square)
-                transparency = std::max(0.0f, transparency); // Ensure transparency is between 0 and 1
-                sf::RectangleShape square(sf::Vector2f(windowSize.x / gridSizeX / pixelSize , windowSize.y / gridSizeY / pixelSize));
-                //sf::CircleShape square(windowSize.x / gridSizeX / pixelSize); // Pixel size
+                float transparency = grid[x][y] / maxCircleCount;// Transparency based on the maxCircleCount (Amount of 'boids' is a square)
+                //sf::RectangleShape square(sf::Vector2f(windowSize.x / gridSizeX / pixelSize , windowSize.y / gridSizeY / pixelSize));
+                sf::CircleShape square(windowSize.x / gridSizeX / pixelSize); // Pixel size
                 square.setPosition(x * (windowSize.x / gridSizeX), y * (windowSize.y / gridSizeY)); // Places the pixels in the grid
                 //square.setOrigin(-windowSize.x / gridSizeX / 4, -windowSize.y / gridSizeY / 4); // Places the 'pixels' in the middle of the grid - bullshit, we are detecting at the intersections, not in the center
                 square.setFillColor(sf::Color(255, 255, 255, (static_cast<sf::Uint8>(transparency*255))));
-                square.setOutlineColor(sf::Color(100,0,100));
-                square.setOutlineThickness(1);
+                //square.setOutlineColor(sf::Color(100,0,100));
+                //square.setOutlineThickness(1);
+
 
                 sf::Text proximityText;
                 proximityText.setString(std::to_string(transparency));
@@ -283,9 +292,10 @@ int main()
                 proximityText.setFont(font);
                 proximityText.setCharacterSize(10);
                 proximityText.setFillColor(sf::Color::White);
+                
 
 
-                window.draw(proximityText);
+                //window.draw(proximityText);
                 window.draw(square);
             }
         }

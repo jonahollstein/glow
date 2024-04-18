@@ -9,7 +9,7 @@
 #include <cmath>
 #include <vector>
 
-const float radius = 0.0f; //Circle radius 0.0 by default, hides the circles.
+const float radius = 1.0f; //Circle radius 0.0 by default, hides the circles.
 const auto circleColor = sf::Color::Cyan;
 
 const float vMax = 5.0f;

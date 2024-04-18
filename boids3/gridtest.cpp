@@ -9,9 +9,19 @@
 const float radius = 1.0f; //Circle radius 0.0 by default, hides the circles.
 const sf::Color circleColor = sf::Color::Cyan;
 
+const int windowSizeX = 1200;
+const int windowSizeY = 600;
 const int gridSizeX = 20;
-const int gridSizeY = 10;
+const int gridSizeY = gridSizeX * windowSizeY/windowSizeX;
 const int pixelSize = 1; //arbitrary number, at 1 it's a grid higher it becomes smaller
+
+
+
+float calcProximity(float gridX, float gridY, float a, float b){
+    gridX += windowSizeX / gridSizeX / 2;
+    gridY += windowSizeY / gridSizeY / 2;
+    return sqrt(pow(gridX - a, 2) + pow(gridY - b, 2)) / (sqrt(pow(windowSizeX/gridSizeX, 2) + pow(windowSizeY/gridSizeY, 2)) /2);
+}
 
 
 int main()
@@ -58,7 +68,7 @@ int main()
         int gridY = static_cast<int>(movingCircle.getPosition().y / (window.getSize().y / gridSizeY));
         
 
-        proximity = (((window.getSize().x / gridSizeX * gridX) - movingCircle.getPosition().x) / (window.getSize().x / gridSizeX) + ((window.getSize().y / gridSizeY * gridY) - movingCircle.getPosition().y) / (window.getSize().y / gridSizeY)) *-1 / 2;
+        proximity = calcProximity(gridX * windowSizeX / gridSizeX, gridY * windowSizeY / gridSizeY, movingCircle.getPosition().x, movingCircle.getPosition().y);
         //proximity = ((window.getSize().x / gridSizeX * gridX - movingCircle.getPosition().x) / (window.getSize().x / gridSizeX) + (window.getSize().y / gridSizeY * gridY - movingCircle.getPosition().y) / (window.getSize().y / gridSizeY)) *-1 / 2;
         if (gridX >= 0 && gridX < gridSizeX && gridY >= 0 && gridY < gridSizeY) {
             grid[gridX][gridY] = 1 - proximity;

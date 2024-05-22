@@ -9,11 +9,11 @@
 #include <cmath>
 #include <vector>
 
-const float radius = 1.0f; //Circle radius 0.0 by default, hides the circles.
+const float radius = 5.0f; //Circle radius 0.0 by default, hides the circles.
 const auto circleColor = sf::Color::Cyan;
 
 const float vMax = 3.0f;
-const float vMin = 2.0f;
+const float vMin = 0.2f;
 const float cohesionDistance = 60.0f;
 const float separationDistance = 55.0f;
 const float maxForce = 1.0f;
@@ -27,9 +27,9 @@ const float repulsionForceFactor = 50.0f; // Strength of repulsion force
 
 const int windowSizeX = 1200;
 const int windowSizeY = 600;
-const int gridSizeX = 50;
+const int gridSizeX = 20;
 const int gridSizeY = gridSizeX * windowSizeY/windowSizeX;
-const int pixelSize = 3; //arbitrary number, at 1 it's a grid higher it becomes smaller
+const int pixelSize = 1; //arbitrary number, at 1 it's a grid higher it becomes smaller
 float maxCircleCount = 0.f; //Pixel brightness is at maximum
 //std::vector<std::vector<int> > grid(gridSizeX, std::vector<int>(gridSizeY, 0));
 
@@ -277,13 +277,13 @@ int main()
         for (int x = 0; x < gridSizeX; ++x) {
             for (int y = 0; y < gridSizeY; ++y) {
                 float transparency = grid[x][y] / maxCircleCount;// Transparency based on the maxCircleCount (Amount of 'boids' is a square)
-                //sf::RectangleShape square(sf::Vector2f(windowSize.x / gridSizeX / pixelSize , windowSize.y / gridSizeY / pixelSize));
-                sf::CircleShape square(windowSize.x / gridSizeX / pixelSize); // Pixel size
+                sf::RectangleShape square(sf::Vector2f(windowSize.x / gridSizeX / pixelSize , windowSize.y / gridSizeY / pixelSize));
+                //sf::CircleShape square(windowSize.x / gridSizeX / pixelSize); // Pixel size
                 square.setPosition(x * (windowSize.x / gridSizeX), y * (windowSize.y / gridSizeY)); // Places the pixels in the grid
                 //square.setOrigin(-windowSize.x / gridSizeX / 4, -windowSize.y / gridSizeY / 4); // Places the 'pixels' in the middle of the grid - bullshit, we are detecting at the intersections, not in the center
                 square.setFillColor(sf::Color(255, 255, 255, (static_cast<sf::Uint8>(transparency*255))));
-                //square.setOutlineColor(sf::Color(100,0,100));
-                //square.setOutlineThickness(1);
+                square.setOutlineColor(sf::Color(100,0,100));
+                square.setOutlineThickness(1);
 
 
                 sf::Text proximityText;
@@ -291,7 +291,7 @@ int main()
                 proximityText.setPosition(x * (windowSize.x / gridSizeX), y * (windowSize.y / gridSizeY));
                 proximityText.setFont(font);
                 proximityText.setCharacterSize(10);
-                proximityText.setFillColor(sf::Color::White);
+                proximityText.setFillColor(sf::Color::Black);
                 
 
 
